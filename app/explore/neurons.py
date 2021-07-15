@@ -34,19 +34,22 @@ def plot_firing_rate(
     session_data: dict,
     granularity: str,
     smooth: bool,
-    **kwargs,
+    trial_id: int = None,
+    title_info: dict = None,
 ):
     """
     Plots the neuron firing rate.
 
         Input:
             - spikes_arr: the spikes data is fed separately if
-              it is preprocessed (eg. brain regions/areas).
+              it is preprocessed (eg. brain regions/areas). It is
+              3-d array if is spikes from the whole session or it is a
+              2-d array if it is spikes from a single trial.
             - session_data: single session data subset from all_data.
             - granularity: "session" or "trial".
             - smooth: a bool value to apply low pass filter.
-            - if granularity="trial", then it requires a new variable called
-              trial_id.
+            - trial_id: required if granularity="trial".
+            - title_info: a dictionary with 2 keys. Example = {"session_id": 1, "trial_id": 1}
         Output:
             - Line plot.
     """
@@ -81,7 +84,12 @@ def plot_firing_rate(
         plt.plot(time_steps, firing_rate_center, label="Center Stay")
         plt.plot(time_steps, firing_rate_right, label="Right Turn")
         plt.axvline(x=session_data["stim_onset"], color="red", label="Stimulus Onset")
-        plt.title(f"Average Neuron Firing Rate Over A Single Session")
+        if title_info:
+            plt.title(
+                f"Average Neuron Firing Rate for {' '.join([f'{k}={v}' for k,v in title_info.items()])}"
+            )
+        else:
+            plt.title(f"Average Neuron Firing Rate For a Single Session")
         plt.legend()
         plt.xlabel("Time (seconds)")
         plt.ylabel("Firing Rate (Hz)")
@@ -91,8 +99,6 @@ def plot_firing_rate(
         # if spikes_arr is already filtered for a trial.
         # This may happen if it's filtered by brain area/
         # region.
-
-        trial_id = kwargs["trial_id"]
 
         if len(spikes_arr.shape) == 2:
             trial_spikes = spikes_arr
@@ -128,7 +134,7 @@ def plot_firing_rate(
             label="Feedback Time",
         )
         plt.title(
-            f"Average Firing Rate Over A Single Trial (response = {idx2response[response]}, feedback={idx2feedback[feedback]})"
+            f"Average Neuron Firing Rate for {' '.join([f'{k}={v}' for k,v in title_info.items()])} with (response = {idx2response[response]}, feedback={idx2feedback[feedback]})"
         )
         plt.legend()
         plt.xlabel("Time (seconds)")
@@ -136,14 +142,29 @@ def plot_firing_rate(
         plt.show()
 
 
-def plot_spikes_raster(trial_spikes_arr: np.ndarray, cmap: str = "gray_r"):
+def plot_spikes_raster(
+    trial_spikes_arr: np.ndarray, title_info: dict = None, cmap: str = "gray_r"
+):
     """
     Plots raster visualization of spiking data. Uses heatmap under the hood
     because of the preprocessed data.
+
+        Inputs
+            - trial_spikes_arr: a 2-d numpy array with spiking data as 1/0.
+            - title_info: a dictionary with 2 keys. Example = {"Trial": 1, "Session": 1}.
+            - cmap: colormap.
+
+        Output:
+            - raster plot built using seaborn heatmap.
     """
     plt.figure(figsize=(7, 7))
     sns.heatmap(trial_spikes_arr, cmap=cmap)
-    plt.title("Spiking Activity of Neurons In A Single Trial")
+    if title_info:
+        plt.title(
+            f"Spiking Activity in {' of '.join([f'{k}={v}' for k,v in title_info.items()])}"
+        )
+    else:
+        plt.title("Spiking Activity in a Single Trial")
     plt.xlabel("Time (binned by 10 msec)")
     plt.ylabel("Individual Neurons")
     plt.show()
