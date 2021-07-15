@@ -30,7 +30,7 @@ def smoothen_firing_rate(
 
 
 def plot_firing_rate(
-    session_spikes_arr: np.ndarray,
+    spikes_arr: np.ndarray,
     session_data: dict,
     granularity: str,
     smooth: bool,
@@ -40,7 +40,7 @@ def plot_firing_rate(
     Plots the neuron firing rate.
 
         Input:
-            - session_spikes_arr: the spikes data is fed separately if
+            - spikes_arr: the spikes data is fed separately if
               it is preprocessed (eg. brain regions/areas).
             - session_data: single session data subset from all_data.
             - granularity: "session" or "trial".
@@ -57,11 +57,10 @@ def plot_firing_rate(
     time_steps = dt * np.arange(T)
 
     if granularity == "session":
-        session_spikes = session_spikes_arr
+        session_spikes = spikes_arr
 
         # events
         response = session_data["response"]
-        stim_onset = session_data["stim_onset"]
 
         # base firing rate
         firing_rate = get_firing_rate(spikes_arr=session_spikes, bin_size=dt)
@@ -81,7 +80,7 @@ def plot_firing_rate(
         plt.plot(time_steps, firing_rate_left, label="Left Turn")
         plt.plot(time_steps, firing_rate_center, label="Center Stay")
         plt.plot(time_steps, firing_rate_right, label="Right Turn")
-        plt.axvline(x=stim_onset, color="red", label="Stimulus Onset")
+        plt.axvline(x=session_data["stim_onset"], color="red", label="Stimulus Onset")
         plt.title(f"Average Neuron Firing Rate Over A Single Session")
         plt.legend()
         plt.xlabel("Time (seconds)")
@@ -89,8 +88,16 @@ def plot_firing_rate(
         plt.show()
 
     elif granularity == "trial":
+        # if spikes_arr is already filtered for a trial.
+        # This may happen if it's filtered by brain area/
+        # region.
+
         trial_id = kwargs["trial_id"]
-        trial_spikes = session_spikes_arr[:, trial_id, :]
+
+        if len(spikes_arr.shape) == 2:
+            trial_spikes = spikes_arr
+        else:
+            trial_spikes = spikes_arr[:, trial_id, :]
 
         # event
         response = session_data["response"][trial_id]
