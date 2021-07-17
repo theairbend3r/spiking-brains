@@ -58,5 +58,11 @@ def load_data(data_path: str) -> np.ndarray:
         all_data[i]["gocue"] += all_data[i]["stim_onset"]
         all_data[i]["response_time"] += all_data[i]["stim_onset"]
         all_data[i]["feedback_time"] += all_data[i]["stim_onset"]
-
+        
+    # squeeze all extra dimensions
+    for i in range(len(all_data)):
+        for k in all_data[i].keys():
+            if type(all_data[i][k]) == np.ndarray:
+                all_data[i][k] = all_data[i][k].squeeze()
+                
     return all_data
