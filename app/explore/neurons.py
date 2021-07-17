@@ -3,7 +3,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from scipy.signal import butter, filtfilt
 
-from app.utils.util import sort_neurons_by_brain_region
+from app.utils.util import sort_neurons_by_brain_region, get_decision_type
 
 sns.set_style("darkgrid")
 
@@ -32,6 +32,7 @@ def plot_spikes_raster(
     feedback = session_data["feedback_type"][trial_id]
     contrast_left = session_data["contrast_left"][trial_id]
     contrast_right = session_data["contrast_right"][trial_id]
+    decision_type = get_decision_type(response=response, feedback=feedback)
 
     # get sorted spikes and filter out the required trial.
     idx_region_list, spikes_arr, sorted_neuron_idx = sort_neurons_by_brain_region(
@@ -58,7 +59,8 @@ def plot_spikes_raster(
     idx2feedback = {1: "positive", -1: "negative"}
 
     plt.suptitle(
-        f"Spiking Activity in Session={session_id} Trial={trial_id}", ha="right"
+        f"Spiking Activity in Session={session_id}  Trial={trial_id}  Decision Type={decision_type}",
+        ha="center",
     )
     plt.title(
         f"response = {idx2response[response]}, feedback={idx2feedback[feedback]}, contrast-left={contrast_left}, contrast-right={contrast_right}",
@@ -67,6 +69,7 @@ def plot_spikes_raster(
     plt.xlabel("Time (binned by 10 msec)")
     plt.ylabel("Individual Neurons")
 
+    # add horizontal lines for all brain regions
     for idx, region in idx_region_list:
         plt.axhline(y=idx, color="black")
         plt.text(2, idx - 4, region)
@@ -156,6 +159,7 @@ def plot_firing_rate(
             feedback = session_data["feedback_type"][trial_id]
             contrast_left = session_data["contrast_left"][trial_id]
             contrast_right = session_data["contrast_right"][trial_id]
+            decision_type = get_decision_type(response=response, feedback=feedback)
 
             # for plot info
             idx2response = {-1: "right", 0: "center", 1: "left"}
@@ -209,7 +213,7 @@ def plot_firing_rate(
                 axes[i].legend()
 
             plt.suptitle(
-                f"Average Neuron Firing Rate for Session={session_id} Trial={trial_id}\n\nresponse = {idx2response[response]}, feedback={idx2feedback[feedback]}, contrast-left={contrast_left}, contrast-right={contrast_right}",
+                f"Average Neuron Firing Rate for Session={session_id}  Trial={trial_id}\nDecision Type={decision_type}\nresponse = {idx2response[response]}, feedback={idx2feedback[feedback]}, contrast-left={contrast_left}, contrast-right={contrast_right}",
                 fontsize=15,
                 va="center",
             )
@@ -297,6 +301,7 @@ def plot_firing_rate(
             feedback = session_data["feedback_type"][trial_id]
             contrast_left = session_data["contrast_left"][trial_id]
             contrast_right = session_data["contrast_right"][trial_id]
+            decision_type = get_decision_type(response=response, feedback=feedback)
 
             # base firing rate.
             firing_rate = get_firing_rate(spikes_arr=spikes_arr, bin_size=dt).mean(
@@ -334,7 +339,7 @@ def plot_firing_rate(
             )
 
             plt.suptitle(
-                f"Average Neuron Firing Rate for Session={session_id} Trial={trial_id}"
+                f"Average Neuron Firing Rate for Session={session_id}  Trial={trial_id}  Decision Type={decision_type}"
             )
             plt.title(
                 f"response = {idx2response[response]}, feedback={idx2feedback[feedback]}, contrast-left={contrast_left}, contrast-right={contrast_right}"

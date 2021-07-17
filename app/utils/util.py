@@ -1,8 +1,21 @@
 import numpy as np
 
 
+def get_decision_type(response: int, feedback: int) -> str:
+    """
+    Returns decision type string.
+    """
+    idx2response = {-1: "right", 0: "center", 1: "left"}
+    idx2feedback = {1: "correct", -1: "wrong"}
+
+    response = idx2response[response]
+    feedback = idx2feedback[feedback]
+
+    return response + "_" + feedback
+
+
 def filter_neurons_by_brain_area(
-    spikes_arr: np.ndarray, brain_areas: list, brain_area_to_neuron: np.ndarray,
+    brain_areas: list, brain_area_to_neuron: np.ndarray,
 ) -> np.ndarray:
     """
     Filter neurons by brain areas.
@@ -32,7 +45,7 @@ def filter_neurons_by_brain_area(
 
 
 def filter_neurons_by_brain_region(
-    spikes_arr: np.ndarray, brain_regions: list, brain_area_to_neuron: np.ndarray
+    brain_regions: list, brain_area_to_neuron: np.ndarray
 ) -> np.ndarray:
     """
     Filter neurons by brain regions.
@@ -125,7 +138,6 @@ def filter_neurons_by_brain_region(
         # get idx of all neurons associated with all areas in a
         # single brain region.
         filtered_idx = filter_neurons_by_brain_area(
-            spikes_arr=spikes_arr,
             brain_area_to_neuron=brain_area_to_neuron,
             brain_areas=all_brain_regions[br],
         )
@@ -169,9 +181,7 @@ def sort_neurons_by_brain_region(all_data: np.ndarray, session_id: int):
     for br in all_brain_regions:
         # get boolean index per brain region
         bool_idx = filter_neurons_by_brain_region(
-            spikes_arr=all_data[session_id]["spks"],
-            brain_regions=[br],
-            brain_area_to_neuron=all_data[session_id]["brain_area"],
+            brain_regions=[br], brain_area_to_neuron=all_data[session_id]["brain_area"],
         )
 
         # get the corresponding ids for all the 'True' items in the
@@ -181,7 +191,13 @@ def sort_neurons_by_brain_region(all_data: np.ndarray, session_id: int):
         # append both the spike arr associated with the bool_idx and
         # neuron_ids to the list
         sorted_neuron_list.append(neuron_id)
-        sorted_spike_list.append(all_data[session_id]["spks"][bool_idx])
+
+        # sorted neurons in the brain region by the number of spikes
+        region_specific_spikes_arr = all_data[session_id]["spks"][bool_idx]
+        sorted_region_specific_spikes_arr = region_specific_spikes_arr[
+            np.argsort(region_specific_spikes_arr.sum(axis=(1, 2)))[::-1]
+        ]
+        sorted_spike_list.append(sorted_region_specific_spikes_arr)
 
     # flatten out the list of list into a single numpy array of neuron ids
     # sorted by brain region.
@@ -211,26 +227,26 @@ def sort_neurons_by_brain_region(all_data: np.ndarray, session_id: int):
 
 def filter_trials(session_data: np.ndarray, filter_by: str) -> dict:
     """
-    Returns dictionary after filtering the data.
+    Returns dictionary of indices after filtering the data.
 
-        Input:
-            session_data: 3d numpy array with data for a session.
-            filter_by: condition for filter. Possible values are
-                       ('response', 'feedback', 'response_feedback').
+    Input:
+        - session_data: 3d numpy array with data for a session.
+        - filter_by: condition for filter. Possible values are
+                    ('response', 'feedback', 'response_feedback').
 
-        Output:
-            dictionary which contains filtered data.
+    Output:
+        - dictionary which contains boolean indices arrays.
     """
     if filter_by == "feedback":
-        correct = session_data["spks"][:, session_data["feedback_type"] == 1, :]
-        wrong = session_data["spks"][:, session_data["feedback_type"] == -1, :]
+        correct = session_data["feedback_type"] == 1
+        wrong = session_data["feedback_type"] == -1
 
         return {"correct": correct, "wrong": wrong}
 
     elif filter_by == "response":
-        left = session_data["spks"][:, session_data["response"] == 1, :]
-        middle = session_data["spks"][:, session_data["response"] == 0, :]
-        right = session_data["spks"][:, session_data["response"] == -1, :]
+        left = session_data["response"] == 1
+        middle = session_data["response"] == 0
+        right = session_data["response"] == -1
 
         return {"left": left, "middle": middle, "right": right}
 
@@ -243,12 +259,12 @@ def filter_trials(session_data: np.ndarray, filter_by: str) -> dict:
         wrong_idx = session_data["feedback_type"] == -1
 
         return {
-            "left_correct": session_data["spks"][:, left_idx * correct_idx, :],
-            "left_wrong": session_data["spks"][:, left_idx * wrong_idx, :],
-            "right_correct": session_data["spks"][:, right_idx * correct_idx, :],
-            "right_wrong": session_data["spks"][:, right_idx * wrong_idx, :],
-            "middle_correct": session_data["spks"][:, middle_idx * correct_idx, :],
-            "middle_wrong": session_data["spks"][:, middle_idx * wrong_idx, :],
+            "left_correct": left_idx * correct_idx,
+            "left_wrong": left_idx * wrong_idx,
+            "right_correct": right_idx * correct_idx,
+            "right_wrong": right_idx * wrong_idx,
+            "middle_correct": middle_idx * correct_idx,
+            "middle_wrong": middle_idx * wrong_idx,
         }
 
     else:
