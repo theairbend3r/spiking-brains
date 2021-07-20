@@ -225,18 +225,21 @@ def sort_neurons_by_brain_region(all_data: np.ndarray, session_id: int):
     return idx_region, sorted_spike_arr, sorted_neuron_idx
 
 
-def filter_trials(session_data: np.ndarray, filter_by: str) -> dict:
+def filter_trials(all_data: np.ndarray, session_id:int, filter_by: str) -> dict:
     """
     Returns dictionary of indices after filtering the data.
 
     Input:
-        - session_data: 3d numpy array with data for a session.
+        - all_data: a 3-d numpy array.
+        - session_id: session number.
         - filter_by: condition for filter. Possible values are
                     ('response', 'feedback', 'response_feedback').
 
     Output:
         - dictionary which contains boolean indices arrays.
     """
+    session_data = all_data[session_id]
+    
     if filter_by == "feedback":
         correct = session_data["feedback_type"] == 1
         wrong = session_data["feedback_type"] == -1

@@ -3,6 +3,9 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from scipy.signal import butter, filtfilt
 
+from sklearn.manifold import TSNE
+from sklearn.decomposition import PCA, FactorAnalysis, FastICA
+
 from app.utils.util import sort_neurons_by_brain_region, get_decision_type
 
 sns.set_style("darkgrid")
@@ -391,3 +394,64 @@ def plot_firing_rate(
             plt.legend()
             plt.show()
 
+
+            
+            
+            
+def reduce_dimensionality(spikes_arr: np.ndarray, n_components:int, algorithm:str):
+    """
+    Returns array after peforming dimensionality reduction.
+    
+    Inputs: 
+        - spikes_arr: a 2-d numpy array.
+        - n_components: final number of components after dim-reduction.
+        - algorithm: dimensionality reduction algorithm.
+        
+    Output:
+        - numpy array with reduced dimensions.
+    """
+    if algorithm == "pca":
+        spikes_arr_mean = spikes_arr.mean(axis=0)
+        pca = PCA(n_components=n_components, 
+                  random_state=2021).fit((spikes_arr - spikes_arr_mean).T)
+        
+        spikes_arr_reduced_dim = pca.transform((spikes_arr - spikes_arr_mean).T)
+        print(f"Explained variance is = {pca.explained_variance_ratio_}")
+                
+    elif algorithm == "tsne":
+        spikes_arr_reduced_dim = TSNE(n_components=n_components, 
+                                  random_state=2021).fit_transform(spikes_arr.T)
+        
+    elif algorithm == "factor-analysis":
+        spikes_arr_reduced_dim = FactorAnalysis(n_components=n_components, 
+                                  random_state=2021).fit_transform(spikes_arr.T)
+    elif algorithm == "fast-ica":
+        spikes_arr_reduced_dim = FastICA(n_components=n_components, 
+                                  random_state=2021).fit_transform(spikes_arr.T)
+    else:
+        raise ValueError("Incorrect algorithm type.")
+
+    return spikes_arr_reduced_dim
+
+
+def plot_components(spikes_arr:np.ndarray, viz_classes: dict):
+    """
+    Plot components after reducing dimensions.
+    
+    Input:
+        - spikes_arr: a 2-d numpy array.
+        - viz_classes: a dicitionary of lists used as an argument to the hue
+            parameter of seaborn.
+            
+    Output:
+        - scatter plot.
+    """
+    plt.figure(figsize=(15,7))
+    fig, axes = plt.subplots(nrows=len(viz_classes), ncols=1, figsize=(10, 10))
+    for i, k in enumerate(viz_classes):
+        sns.scatterplot(x=spikes_arr[:, 0], y=spikes_arr[:, 1], hue=viz_classes[k], ax = axes[i])
+        axes[i].set_title(f"Reduced neuron dimension coloured by = {k}")
+    
+    plt.xlabel("Component 1")
+    plt.ylabel("Component 2")
+    plt.show()
