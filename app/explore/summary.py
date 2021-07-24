@@ -1,3 +1,7 @@
+"""
+Functions to summarise session and trial data.
+"""
+
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -9,8 +13,16 @@ sns.set_style("darkgrid")
 
 
 def trial_event_flow(all_data: np.ndarray, session_id: int, trial_id: int):
-    """
-    Prints events in a trial sequentially.
+    """Prints events in a trial sequentially.
+
+    Parameters
+    ----------
+    all_data: np.ndarray
+        A 2-d numpy array that contains data from all sessions.
+    session_id: int
+        Integer that denotes a particular session.
+    trial_id: int
+        Integer that denotes a trial within a session.
     """
 
     session_data = all_data[session_id]
@@ -37,9 +49,15 @@ def trial_event_flow(all_data: np.ndarray, session_id: int, trial_id: int):
 
 
 def session_stats(all_data: np.ndarray, session_id: int):
-    """
-    Prints introductory information about a session and size
+    """ Prints introductory information about a session and size
     of all variables.
+
+    Parameters
+    ----------
+    all_data: np.ndarray
+        A 2-d numpy array that contains data from all sessions.
+    session_id: int
+        Integer that denotes a particular session.
     """
     print(f"Number of sessions = {len(all_data)}\n\n")
 
@@ -65,67 +83,29 @@ def session_stats(all_data: np.ndarray, session_id: int):
             print(f"\t{k} :  {all_data[session_id][k]}")
 
 
-# def session_accuracy_report(session_data: dict, plot: bool) -> float:
-#     """
-#     Returns accuracy or plots the decision summary of a session.
-#     """
-#     # -1 for right, +1 for left, 0 for center
-#     # in session_data["response"]. We remap it to
-#     # 2, 1, and 0.
+def session_accuracy_report(all_data: np.ndarray, session_id: int, plot: bool) -> float:
+    """Returns response accuracy of a mouse in a single session.
 
-#     idx2class = {2: "right", 0: "center", 1: "left"}
+    Can optionally plot the confusion matrix.
 
-#     # dsicard for accuracy calculation where the left and right contrast are
-#     # equal and non-zero as the mouse was randomly rewarded for those cases.
+    Parameters
+    ----------
+    all_data: np.ndarray
+        A 2-d numpy array that contains data from all sessions.
+    session_id: int
+        Integer that denotes a particular session.
+    plot: bool, optional
+        Plots a confusion matrix if True.
 
-#     keep_idx = np.logical_not(
-#         (session_data["contrast_left"] == session_data["contrast_right"])
-#         * (session_data["contrast_left"] != 0)
-#         * (session_data["contrast_right"] != 0)
-#     )
-
-#     # 0:center, 1: left, 2:right
-#     true_output = []
-#     for l, r in zip(
-#         session_data["contrast_left"].tolist(), session_data["contrast_right"].tolist()
-#     ):
-#         if r > l:
-#             true_output.append(2)
-#         elif l > r:
-#             true_output.append(1)
-#         else:
-#             true_output.append(0)
-
-#     # 0:center, 1: left, 2:right
-#     pred_output = session_data["response"].tolist()
-#     pred_output = [int(i) for i in pred_output]
-#     pred_output = [2 if i == -1 else i for i in pred_output]
-
-#     # ignore the equal but non-zero contrast data.
-#     pred_output = np.array(true_output)[keep_idx]
-#     true_output = np.array(true_output)[keep_idx]
-
-#     if plot:
-#         print(classification_report(true_output, pred_output))
-#         df = pd.DataFrame(confusion_matrix(true_output, pred_output)).rename(
-#             columns=idx2class, index=idx2class
-#         )
-#         sns.heatmap(df, annot=True)
-#         plt.xlabel("Predicted")
-#         plt.ylabel("Actual")
-#         plt.title("Confusion Matrix")
-#     else:
-#         acc = accuracy_score(true_output, pred_output)
-#         return acc * 100
-
-
-def session_accuracy_report(session_data: dict, plot: bool) -> float:
-    """
-    Returns accuracy or plots the decision summary of a session.
+    Returns
+    -------
+    float
+        Returns response accuracy.
     """
     # -1 for right, +1 for left, 0 for center
     # in session_data["response"]. We remap it to
     # 2, 1, and 0.
+    session_data = all_data[session_id]
 
     idx2class = {2: "right", 0: "center", 1: "left"}
 
@@ -155,7 +135,51 @@ def session_accuracy_report(session_data: dict, plot: bool) -> float:
         plt.xlabel("Predicted")
         plt.ylabel("Actual")
         plt.title("Confusion Matrix")
-    else:
-        acc = accuracy_score(true_output, pred_output)
-        return acc * 100
+
+    acc = accuracy_score(true_output, pred_output)
+    return acc * 100
+
+
+def session_accuracy(all_data: np.ndarray, session_id: int):
+    """Returns the average response accuracy for all trials in a session.
+
+    Uses 'feedback_type' to calculate the accuracy.
+
+    Parameters
+    -----------
+    all_data: np.ndarray
+        A 2-d numpy array that contains data from all sessions.
+    session_id: int
+        Integer that denotes a particular session.
+
+    Returns
+    -------
+    float
+        Accuracy percentage.
+    """
+    session_data = all_data[session_id]
+    session_feedback = session_data["feedback_type"]
+    session_feedback = np.where(session_feedback == -1, 0, 1)
+    session_acc = session_feedback.mean()
+
+    return session_acc * 100
+
+
+def get_mouse_sessions(all_data: np.ndarray, mouse_name: str) -> list:
+    """
+    Return session-ids that a single mouse participated in.
+
+    Parameters
+    -----------
+    all_data: np.ndarray
+        3-d numpy array that contains data from all sessions.
+    mosue_name: str
+        Name of mouse.
+
+    Returns
+    -------
+    list
+        List of sessions for a particular mouse.
+    """
+    return [i for i in range(len(all_data)) if all_data[i]["mouse_name"] == mouse_name]
 

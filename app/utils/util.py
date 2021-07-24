@@ -1,9 +1,26 @@
+"""
+Functions for general utilities.
+"""
+
 import numpy as np
 
 
 def get_decision_type(response: int, feedback: int) -> str:
-    """
-    Returns decision type string.
+    """Returns decision type string.
+
+    Parameters
+    ----------
+    response: int
+        Response associated with a single trial. Can be -1 (right),
+        0 (middle), (1)left.
+    feedback: int
+        Feedback associated with the given response for a single trial.
+        Can be +1 (correct) or -1 (wrong).
+
+    Returns
+    -------
+    str
+        ``response``_``feeback``
     """
     idx2response = {-1: "right", 0: "center", 1: "left"}
     idx2feedback = {1: "correct", -1: "wrong"}
@@ -17,20 +34,22 @@ def get_decision_type(response: int, feedback: int) -> str:
 def filter_neurons_by_brain_area(
     brain_areas: list, brain_area_to_neuron: np.ndarray,
 ) -> np.ndarray:
-    """
-    Filter neurons by brain areas.
+    """Filter neurons by brain areas.
 
-    Input:
-        - spikes_arr: 3-d numpy array that contain spiking
-            data from a single session. eg. session_data["spks"]
-        - brain_areas: a list of brain areas required.
-        - brain_area_to_neuron: 1-d numpy array of the same length as
-            as the spikes arr at dim=0 which contains a brain area
-            string for each index of the array. eg. session_data["brain_area"]
+    Parameters
+    ----------
+    brain_areas: list
+        A list of brain areas required.
+    brain_area_to_neuron: np.ndarray
+        1-d numpy array of the same length as as the spikes arr at
+        dim=0 which contains a brain area string for each index of
+        the array. eg. session_data["brain_area"].
 
-    Output:
-        - numpy array with boolen indice that correspond to the presence of a
-            neuron in the said area.
+    Returns
+    -------
+    np.ndaray
+        A numpy array with boolen indice that correspond to the
+        presence of a neuron in the said area.
     """
     filtered_idx = []
 
@@ -47,20 +66,22 @@ def filter_neurons_by_brain_area(
 def filter_neurons_by_brain_region(
     brain_regions: list, brain_area_to_neuron: np.ndarray
 ) -> np.ndarray:
-    """
-    Filter neurons by brain regions.
+    """Filter neurons by brain regions.
 
-    Input:
-        - spikes_arr: 3-d numpy array that contain spiking
-            data from a single session. eg. session_data["spks"]
-        - brain_regions: a list of brain regions required.
-        - brain_area_to_neuron: 1-d numpy array of the same length as
-            as the spikes arr at dim=0 which contains a brain area
-            string for each index of the array. eg. session_data["brain_area"]
+    Parameters
+    ----------
+    brain_regions: list
+        A list of brain regions required.
+    brain_area_to_neuron: np.ndarray
+        1-d numpy array of the same length as as the spikes arr at
+        dim=0 which contains a brain area string for each index of
+        the array. eg. session_data["brain_area"].
 
-    Output:
-        - numpy array with boolen indice that correspond to the presence of a
-            neuron in the said area.
+    Returns
+    -------
+    np.ndaray
+        A numpy array with boolen indice that correspond to the
+        presence of a neuron in the said region.
     """
 
     all_brain_regions = {
@@ -148,17 +169,20 @@ def filter_neurons_by_brain_region(
 
 
 def sort_neurons_by_brain_region(all_data: np.ndarray, session_id: int):
-    """
-    Sort the neurons by index based on the brain regions they belong to.
+    """Sort the neurons by index based on the brain regions they belong to.
 
-    Input:
-        - all_data: 3-d numpy array that contains data for all sessions.
-        - session_id: an integer index for the values for a session.
+    Parameters
+    ----------
+    all_data: np.ndarray
+        A 2-d numpy array that contains data from all sessions.
+    session_id: int
+        Integer that denotes a particular session.
 
-    Output:
-        - a tuple of 3 values: idx of last neuron in a region, name of region,
-            and a sorted index array of neurons clubbed by all brain regions.
-
+    Returns
+    -------
+    tuple
+        a tuple of 3 values: idx of last neuron in a region, name of region,
+        and a sorted index array of neurons clubbed by all brain regions.
     """
 
     # contains the actual spike data
@@ -225,21 +249,27 @@ def sort_neurons_by_brain_region(all_data: np.ndarray, session_id: int):
     return idx_region, sorted_spike_arr, sorted_neuron_idx
 
 
-def filter_trials(all_data: np.ndarray, session_id:int, filter_by: str) -> dict:
+def filter_trials(all_data: np.ndarray, session_id: int, filter_by: str) -> dict:
     """
     Returns dictionary of indices after filtering the data.
 
-    Input:
-        - all_data: a 3-d numpy array.
-        - session_id: session number.
-        - filter_by: condition for filter. Possible values are
-                    ('response', 'feedback', 'response_feedback').
+    Parameters
+    ----------
+    all_data: np.ndarray
+        A 2-d numpy array that contains data from all sessions.
+    session_id: int
+        Integer that denotes a particular session.
+    filter_by: str
+        condition for filter. Possible values are - 'response', 'feedback',
+        or 'response_feedback'.
 
-    Output:
-        - dictionary which contains boolean indices arrays.
+    Returns
+    -------
+    dict
+        dictionary which contains boolean indices arrays.
     """
     session_data = all_data[session_id]
-    
+
     if filter_by == "feedback":
         correct = session_data["feedback_type"] == 1
         wrong = session_data["feedback_type"] == -1
@@ -274,3 +304,30 @@ def filter_trials(all_data: np.ndarray, session_id:int, filter_by: str) -> dict:
         raise ValueError(
             "filter_by can only be one of - ('response', 'feedback', 'response_feedback')."
         )
+
+
+def map_neuron_idx_to_region(neuron_idx: int, brain_region_last_idx: list) -> str:
+    """ Returns associated brain region given a neuron index in a single session.
+
+    Parameters
+    ----------
+    neuron_idx: int
+        Index of neuron in the spikes array of a single session.
+    brain_region_last_idx: list
+        Last neuron index associated with a brain region.
+
+    Returns
+    -------
+    str
+        Brain region of the given neuron index.
+    """
+    min_idx = 0
+    for i in range(0, len(brain_region_last_idx)):
+        if neuron_idx >= min_idx and neuron_idx <= brain_region_last_idx[i][0]:
+            return brain_region_last_idx[i][1]
+
+        min_idx = brain_region_last_idx[i][0]
+
+    else:
+        return f"No corresponding brain region found for neuron #{neuron_idx}."
+

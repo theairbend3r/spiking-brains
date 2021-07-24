@@ -1,11 +1,19 @@
+"""
+Functions to access Steinmetz dataset.
+"""
 from tqdm.notebook import tqdm
 import numpy as np
 import os, requests
 
 
 def download_data(data_path: str):
-    """
-    Download the Steinmetz dataset.
+    """Download the Steinmetz dataset.
+
+    Parameters
+    ----------
+    data_path: str
+        Path to save the dataset.
+
     """
     print("Downloading data.")
     fname = []
@@ -33,9 +41,18 @@ def download_data(data_path: str):
 
 
 def load_data(data_path: str) -> np.ndarray:
-    """
-    Load dataset from the given path. If dataset does not exist,
-    it is downlaoded.
+    """Load dataset from the given path.
+    If dataset does not exist, it is auto downlaoded.
+
+    Parameters
+    ----------
+    data_path: str
+        Path where the dataset is saved.
+
+    Returns
+    -------
+    np.ndarray
+        Numpy array which contains the data.
     """
     # download data if not already present.
     if len(os.listdir(data_path)) == 0:
@@ -58,11 +75,11 @@ def load_data(data_path: str) -> np.ndarray:
         all_data[i]["gocue"] += all_data[i]["stim_onset"]
         all_data[i]["response_time"] += all_data[i]["stim_onset"]
         all_data[i]["feedback_time"] += all_data[i]["stim_onset"]
-        
+
     # squeeze all extra dimensions
     for i in range(len(all_data)):
         for k in all_data[i].keys():
             if type(all_data[i][k]) == np.ndarray:
                 all_data[i][k] = all_data[i][k].squeeze()
-                
+
     return all_data

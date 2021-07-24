@@ -1,3 +1,7 @@
+"""
+Functions to explore neuron specific data.
+"""
+
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -14,17 +18,20 @@ sns.set_style("darkgrid")
 def plot_spikes_raster(
     all_data: dict, session_id: int, trial_id: int, cmap: str = "gray_r"
 ):
-    """
-    Plots raster visualization of spiking data. Uses heatmap under the hood.
+    """Plots raster visualization of spiking data.
 
-        Inputs
-            - all_data: a 2-d numpy array with spiking data as 1/0.
-            - session_id: integer that denotes the session id.
-            - trial_id: integer that denotes the trial_id within a session.
-            - cmap: colormap.
+    Uses heatmap under the hood.
 
-        Output:
-            - raster plot built using seaborn heatmap.
+    Parameters
+    ----------
+    all_data: np.ndarray
+        A 2-d numpy array that contains data from all sessions.
+    session_id: int
+        Integer that denotes a particular session.
+    trial_id: int
+        Integer that denotes a trial within a session.
+    cmap
+        Plot colormap.
     """
 
     # extract session data.
@@ -89,17 +96,22 @@ def plot_spikes_raster(
 
 
 def get_firing_rate(spikes_arr: np.ndarray, bin_size: float) -> np.ndarray:
-    """
-    Returns firing rate of neurons.
+    """Returns the firing rate of neurons.
 
-    Input:
-        - spikes_arr: a numpy array with spiking data (1/0s).
-        - bin_size: a float value.
+    Firing rate is defined as ``spike_arr/bin_size``.
 
-    Output:
-        - numpy array the same size as spikes_arr but with firing rates.
+    Parameters
+    ----------
+    spikes_arr: np.ndarray
+        A numpy array with spiking data as binary values (1/0).
+    bin_size: float
+        Time (in seconds).
 
-    Firing rate is defined as spike_arr/bin_size.
+
+    Returns
+    -------
+    np.ndarray
+        A numpy array the same size as ``spikes_arr`` but with firing rates.
     """
     return (1 / bin_size) * spikes_arr
 
@@ -111,8 +123,7 @@ def smoothen_firing_rate(
     btype: int = "lowpass",
     fs: int = 50000,
 ) -> np.ndarray:
-    """
-    Applies smoothening filter on firing rate.
+    """Applies smoothening filter on firing rate.
     """
     b, a = butter(order, wn, btype, fs=fs)
 
@@ -126,11 +137,21 @@ def plot_firing_rate(
     smooth: bool = True,
     by_brain_regions: bool = False,
 ):
-    """
-    Plots the neuron firing rate.
-    Input:
-        all_data:
-    Output:
+    """Plots the neuron firing rate.
+
+     Parameters
+    ----------
+    all_data: np.ndarray
+        A 2-d numpy array that contains data from all sessions.
+    session_id: int
+        Integer that denotes a particular session.
+    trial_id: int
+        Integer that denotes a trial within a session.
+    smooth: bool
+        Smoothens firing rate if True.
+    by_brain_regions: bool
+        Produces subplots for each brain-region if True.
+
     """
     # extract session data.
     session_data = all_data[session_id]
@@ -395,63 +416,71 @@ def plot_firing_rate(
             plt.show()
 
 
-            
-            
-            
-def reduce_dimensionality(spikes_arr: np.ndarray, n_components:int, algorithm:str):
-    """
-    Returns array after peforming dimensionality reduction.
-    
-    Inputs: 
-        - spikes_arr: a 2-d numpy array.
-        - n_components: final number of components after dim-reduction.
-        - algorithm: dimensionality reduction algorithm.
-        
-    Output:
-        - numpy array with reduced dimensions.
+def reduce_dimensionality(spikes_arr: np.ndarray, n_components: int, algorithm: str):
+    """Returns array after peforming dimensionality reduction.
+
+    Parameters
+    ----------
+    spikes_arr: np.ndarray
+        A 2-d numpy array which contains binary spike-data.
+    n_components: int
+        Final number of components after dimensionality reduction.
+    algorithm: str
+        Dimensionality reduction algorithm. Available options are - 'pca',
+        'tsne', 'factor-analysis', 'fast-ica'.
+
+    Returns
+    -------
+    np.ndarray
+        Numpy array with reduced dimensions.
     """
     if algorithm == "pca":
         spikes_arr_mean = spikes_arr.mean(axis=0)
-        pca = PCA(n_components=n_components, 
-                  random_state=2021).fit((spikes_arr - spikes_arr_mean).T)
-        
+        pca = PCA(n_components=n_components, random_state=2021).fit(
+            (spikes_arr - spikes_arr_mean).T
+        )
+
         spikes_arr_reduced_dim = pca.transform((spikes_arr - spikes_arr_mean).T)
         print(f"Explained variance is = {pca.explained_variance_ratio_}")
-                
+
     elif algorithm == "tsne":
-        spikes_arr_reduced_dim = TSNE(n_components=n_components, 
-                                  random_state=2021).fit_transform(spikes_arr.T)
-        
+        spikes_arr_reduced_dim = TSNE(
+            n_components=n_components, random_state=2021
+        ).fit_transform(spikes_arr.T)
+
     elif algorithm == "factor-analysis":
-        spikes_arr_reduced_dim = FactorAnalysis(n_components=n_components, 
-                                  random_state=2021).fit_transform(spikes_arr.T)
+        spikes_arr_reduced_dim = FactorAnalysis(
+            n_components=n_components, random_state=2021
+        ).fit_transform(spikes_arr.T)
     elif algorithm == "fast-ica":
-        spikes_arr_reduced_dim = FastICA(n_components=n_components, 
-                                  random_state=2021).fit_transform(spikes_arr.T)
+        spikes_arr_reduced_dim = FastICA(
+            n_components=n_components, random_state=2021
+        ).fit_transform(spikes_arr.T)
     else:
         raise ValueError("Incorrect algorithm type.")
 
     return spikes_arr_reduced_dim
 
 
-def plot_components(spikes_arr:np.ndarray, viz_classes: dict):
+def plot_components(spikes_arr: np.ndarray, viz_classes: dict):
+    """Plot components after reducing dimensions.
+
+    Parameters
+    ----------
+    spikes_arr: np.ndarray
+        A 2-d numpy array which contains binary spike-data.
+    viz_classes: dict
+        Dicitionary of lists used as an argument to the hue
+        parameter of seaborn.
     """
-    Plot components after reducing dimensions.
-    
-    Input:
-        - spikes_arr: a 2-d numpy array.
-        - viz_classes: a dicitionary of lists used as an argument to the hue
-            parameter of seaborn.
-            
-    Output:
-        - scatter plot.
-    """
-    plt.figure(figsize=(15,7))
+    plt.figure(figsize=(15, 7))
     fig, axes = plt.subplots(nrows=len(viz_classes), ncols=1, figsize=(10, 10))
     for i, k in enumerate(viz_classes):
-        sns.scatterplot(x=spikes_arr[:, 0], y=spikes_arr[:, 1], hue=viz_classes[k], ax = axes[i])
+        sns.scatterplot(
+            x=spikes_arr[:, 0], y=spikes_arr[:, 1], hue=viz_classes[k], ax=axes[i]
+        )
         axes[i].set_title(f"Reduced neuron dimension coloured by = {k}")
-    
+
     plt.xlabel("Component 1")
     plt.ylabel("Component 2")
     plt.show()
