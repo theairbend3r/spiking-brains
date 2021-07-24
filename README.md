@@ -1,5 +1,7 @@
 # Spiking Brains
 
+[![Documentation Status](https://readthedocs.org/projects/spiking-brains/badge/?version=latest)](https://spiking-brains.readthedocs.io/en/latest/?badge=latest)
+
 Analysis of the Steinmetz neurons dataset using methods from computational neuroscience and machine learning.
 
 ![Spiking Brains](./assets/spiking-brains.png)
@@ -35,7 +37,7 @@ git clone https://github.com/theairbend3r/spiking-brains.git
 Using Conda.
 
 ```sh
-conda env create -f <environment-name>.yml
+conda env create -f spiking-brains.yml
 ```
 
 Using Pip.

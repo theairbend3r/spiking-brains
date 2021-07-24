@@ -9,6 +9,11 @@
 
 Welcome to Spiking Brains's documentation!
 ==========================================
+
+.. image:: https://readthedocs.org/projects/spiking-brains/badge/?version=latest
+   :target: https://spiking-brains.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
+
 Analysis of the Steinmetz neurons dataset using methods from computational neuroscience and machine learning.
 
 .. figure:: ../assets/spiking-brains.png
@@ -61,7 +66,7 @@ Using Conda.
 
 .. code:: sh
 
-   conda env create -f <environment-name>.yml
+   conda env create -f spiking-brains.yml
 
 Using Pip.
 
@@ -72,7 +77,7 @@ Using Pip.
 Meta
 ----
 
-Akshaj Verma – [@theairbend3r](https://twitter.com/theairbend3r).
+`Akshaj Verma – @theairbend3r <https://twitter.com/theairbend3r>`_
 
 Distributed under the GNU GPL-V3 license. See ``LICENSE`` for more
 information.
