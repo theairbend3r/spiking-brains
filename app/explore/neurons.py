@@ -139,7 +139,7 @@ def plot_firing_rate(
 ):
     """Plots the neuron firing rate.
 
-     Parameters
+    Parameters
     ----------
     all_data: np.ndarray
         A 2-d numpy array that contains data from all sessions.
@@ -151,7 +151,6 @@ def plot_firing_rate(
         Smoothens firing rate if True.
     by_brain_regions: bool
         Produces subplots for each brain-region if True.
-
     """
     # extract session data.
     session_data = all_data[session_id]
