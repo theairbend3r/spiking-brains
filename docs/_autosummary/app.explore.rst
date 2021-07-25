@@ -1,4 +1,4 @@
-﻿app.explore
+app.explore
 ===========
 
 .. automodule:: app.explore
