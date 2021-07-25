@@ -1,9 +1,10 @@
 """
 Functions to access Steinmetz dataset.
 """
-from tqdm.notebook import tqdm
+
 import numpy as np
 import os, requests
+from tqdm.notebook import tqdm
 
 
 def download_data(data_path: str):
