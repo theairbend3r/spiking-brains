@@ -11,4 +11,4 @@ numpy
 pandas
 seaborn
 tqdm
-
+scikit-learn
