@@ -65,9 +65,9 @@ Following are the notebooks that use function from `./app/` to perform analysis.
   - Response type
   - Contrast left
   - Contrast right
-- Tune the model and use 8-fold cross validation gauge accuracy.
+- Tune the model and use 8-fold cross validation to gauge accuracy.
 - Plot the confusion matrix to compare the actual mouse response vs the model's response.
-- Analyse the beta-weights per input variable to see it's effect on the response.
+- Analyse the beta-weights per input variable to see its effect on the response.
 
 ### Results
 
