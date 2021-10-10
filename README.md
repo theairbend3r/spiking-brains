@@ -2,7 +2,7 @@
 
 [![Documentation Status](https://readthedocs.org/projects/spiking-brains/badge/?version=latest)](https://spiking-brains.readthedocs.io/en/latest/?badge=latest)
 
-Analysis of the Steinmetz neurons dataset using methods from computational neuroscience and machine learning.
+Study the effect of memory on current response (to behavioral tasks) in mice using methods from computational neuroscience and machine learning.
 
 ![Spiking Brains](./assets/spiking-brains.png)
 
@@ -34,36 +34,17 @@ The modules reside in the package `./app`.
 
 Following are the notebooks that use function from `./app/` to perform analysis.
 
-1. `Exploratory Analysis`
-
-   - The `01_exploratory_analysis.ipynb` notebook contains stats about the the dataset.
-   - Experiment flow across sessions and trials.
-   - Visualization of readings from different brain-regions.
-
-2. `Behaviour Analysis`
-
-   - The `02_behaviour_analysis.ipynb` notebooks contains analysis around response to stimulus.
-   - Filter trials by response + feedback and visualize cumulative response accuracy.
-
-3. `Neurons Analysis`
-
-   - The `03_neurons_analysis.ipynb` notebooks contains analysis around neuron spikes and firing rate.
-   - Filter neurons by brain regions and visualize spiking activity as raster plots.
-   - Dimensionality reduction for visualization of response type and accuracy.
-
-4. `Phenomena Analysis`
-
-   - The `04_phenomenon_analysis.ipynb` notebook analyses spiking activity with respect to behavioural response.
-   - Raster plot for devision type vs spiking activity sorted by brain regions.
-
-5. `Machine Learning Modelling`
-   - The `05_modelling.ipynb` notebook uses machine learning to study the effect of trial history on current response.
+1. Exploratory Analysis
+2. Behaviour Analysis
+3. Neurons Analysis
+4. Phenomena Analysis
+5. Machine Learning Modelling
 
 ## Experiment and Analysis
 
 ### Goal
 
-- Study the effect of memory on current response to behavioral tasks in mice using Python.
+- Study the effect of memory on current response (to behavioral tasks) in mice using machine learning.
 
 ### Hypothesis
 
